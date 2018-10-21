@@ -48,5 +48,8 @@ public class SimpleBeingRunnable
         // for this being via a call to the appropriate Being super
         // class helper method.
         // TODO -- you fill in here.
+        Palantir palantir = this.acquirePalantir();
+        palantir.gaze(this);
+        this.releasePalantir(palantir);
     }
 }
