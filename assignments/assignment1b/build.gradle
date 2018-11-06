@@ -11,7 +11,7 @@ buildscript {
     dependencies {
 		// Required by Vanderbilt autograder - do not remove
 		classpath 'edu.vanderbilt.grader:gradle-plugin:1.4.5'
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
     }
 }

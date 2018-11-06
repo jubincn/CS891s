@@ -34,8 +34,7 @@ import static edu.vandy.simulator.model.implementation.components.SimulatorModel
  * forwarded to the presentation layer.
  */
 public abstract class BeingComponent extends
-        BaseComponent<SimulatorModel.Type,
-                BeingComponent.State> {
+        BaseComponent<SimulatorModel.Type, BeingComponent.State> {
     /**
      * Logging tag.
      */

@@ -1,5 +1,7 @@
 package edu.vandy.simulator.managers.beings.runnableThreads;
 
+import java.util.concurrent.CancellationException;
+
 import edu.vandy.simulator.managers.beings.Being;
 import edu.vandy.simulator.managers.beings.BeingManager;
 import edu.vandy.simulator.managers.palantiri.Palantir;
@@ -47,6 +49,14 @@ public class SimpleBeingRunnable
         // a random period of time).  Finally, release the palantir
         // for this being via a call to the appropriate Being super
         // class helper method.
-        // TODO -- you fill in here.
+        // DONE -- you fill in here.
+        Palantir palantir;
+        try {
+            palantir = mManager.acquirePalantir(this);
+            palantir.gaze(this);
+            mManager.releasePalantir(this, palantir);
+        } catch (CancellationException e) {
+            error(e);
+        }
     }
 }

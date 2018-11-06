@@ -1,7 +1,9 @@
 package edu.vandy.simulator.managers.palantiri.spinLockHashMap;
 
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
 /**
@@ -15,12 +17,14 @@ class ReentrantSpinLock {
      * should be "unlocked".
      */
     // TODO -- you fill in here.
+    private AtomicReference<Thread> mOwner;
  
     /**
      * Count the number of times the owner thread has recursively
      * acquired the lock.
      */
     // TODO -- you fill in here.
+    private long count;
 
     /**
      * Acquire the lock only if it is free at the time of invocation.
@@ -33,7 +37,7 @@ class ReentrantSpinLock {
         // succeeds iff its current value is null (false).
         // TODO -- you fill in here, replacing false with the proper
         // code.
-        return false;
+        return mOwner.compareAndSet(null, Thread.currentThread());
     }
 
     /**
@@ -55,6 +59,18 @@ class ReentrantSpinLock {
         // check if a shutdown has been requested and if so throw a
         // cancellation exception.  
         // TODO -- you fill in here.
+        do {
+            if (isCancelled.get()) {
+                throw new CancellationException("Cancelled");
+            }
+            if (mOwner.get() == Thread.currentThread()) {
+                count++;
+                break;
+            } else {
+                if (mOwner.compareAndSet(null, Thread.currentThread())) break;
+            }
+
+        } while (true);
     }
 
     /**
@@ -66,5 +82,10 @@ class ReentrantSpinLock {
         // atomically release the lock that's currently held by
         // mOwner.
         // TODO -- you fill in here.
+        if (count > 0) {
+            count--;
+        } else {
+            mOwner.set(null);
+        }
     }
 }

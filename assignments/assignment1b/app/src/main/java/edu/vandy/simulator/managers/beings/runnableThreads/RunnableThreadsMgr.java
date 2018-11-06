@@ -15,18 +15,18 @@ import static java.util.stream.Collectors.toList;
  * threads to run the being simulations.
  */
 public class RunnableThreadsMgr
-       extends BeingManager<SimpleBeingRunnable> {
+        extends BeingManager<SimpleBeingRunnable> {
     /**
      * Used for Android debugging.
      */
     private final static String TAG =
-        RunnableThreadsMgr.class.getName();
+            RunnableThreadsMgr.class.getName();
 
     /**
      * The list of beings (implemented as concurrent Java threads)
      * that are attempting to acquire palantiri for gazing.
      */
-    private List<Thread> mBeingThreads;
+    private List<Thread> mBeingThreads = new ArrayList<>();
 
     /**
      * A factory method that returns a new SimpleBeingRunnable instance.
@@ -36,9 +36,10 @@ public class RunnableThreadsMgr
     @Override
     public SimpleBeingRunnable newBeing() {
         // Return a new SimpleBeingRunnable instance.
-        // TODO -- you fill in here, replacing null with the
+        // DONE -- you fill in here, replacing null with the
         // appropriate code.
-        return null;
+
+        return new SimpleBeingRunnable(this);
     }
 
     /**
@@ -48,15 +49,17 @@ public class RunnableThreadsMgr
     @Override
     public void runSimulation() {
         // Call a method to create and start a thread for each being.
-        // TODO -- you fill in here.
-
+        // DONE -- you fill in here.
+        beginBeingThreads();
         // Call a method that creates and starts a thread that's then
         //  used to wait for all the being threads to finish and
         //  return that thread to the caller.
-        // TODO -- you fill in here.
+        // DONE -- you fill in here.
+        createAndStartWaiterForBeingThreads();
 
         // Block until the waiter thread has finished.
-        // TODO -- you fill in here.
+        // DONE -- you fill in here.
+        shutdownNow();
     }
 
     /**
@@ -76,7 +79,14 @@ public class RunnableThreadsMgr
         // Undergraduates do not need to set this exception handler
         // (though they are free to do to if they choose).
         //
-        // TODO -- you fill in here.
+        // DONE -- you fill in here.
+        List<SimpleBeingRunnable> beings = getBeings();
+        for (SimpleBeingRunnable being : beings) {
+            Thread thread = new Thread(being);
+            thread.setUncaughtExceptionHandler((t, e) -> error("An exception " + e + " occured in thread " + thread.getName()));
+            mBeingThreads.add(thread);
+            thread.start();
+        }
     }
 
     /**
@@ -92,14 +102,24 @@ public class RunnableThreadsMgr
         // BeingManager.error() helper method with the exception in
         // the catch clause, which trigger the simulator to generate a
         // shutdownNow() request.
-        // TODO -- you fill in here.
+        // DONE -- you fill in here.
+        Thread sentry = new Thread(() -> {
+            for (Thread thread : mBeingThreads) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    RunnableThreadsMgr.this.error(e);
+                }
+            }
+        });
 
         // Start running the thread.
-        // TODO -- you fill in here.
+        // DONE -- you fill in here.
+        sentry.start();
 
         // Return the thread.
-        // TODO -- you fill in here, replacing null with the thread that was created.
-        return null;
+        // DONE -- you fill in here, replacing null with the thread that was created.
+        return sentry;
     }
 
     /**

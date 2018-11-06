@@ -22,14 +22,14 @@ import edu.vandy.simulator.model.interfaces.ModelProvider;
  * routes requests from the Simulator to the PalantiriManager subclass
  * implementation of the acquire and release methods. It also provides
  * overloaded {@link #error} methods that can be called to handle any
- * non-recoverable error.  
+ * non-recoverable error.
  *
  * <p> This class also contains a factory for generating different
  * PalantiriManager implementation strategies.
  */
 public abstract class PalantirManager
-       implements ModelProvider, 
-                  CancellableComponent {
+        implements ModelProvider,
+        CancellableComponent {
     /**
      * Logging tag.
      */
@@ -166,18 +166,10 @@ public abstract class PalantirManager
      * @param beingId The being id (not currently used).
      * @return A Palantir or null if the a shutdown in progress.
      */
-    // TODO: fix this and them remove comment...
-    //@NotNull
+    // Done: fix this and them remove comment...
+    @NotNull
     final public Palantir acquirePalantir(long beingId) {
-        try {
-            return acquire();
-        } catch (CancellationException e) {
-            // TODO: Mapping any exception to a null value is
-            // a bad idea. Fix this and use @NotNull for this
-            // method and let it rethrow the exception or better
-            // yet, not even catch it.
-            return null;
-        }
+        return acquire();
     }
 
     /**
@@ -185,7 +177,7 @@ public abstract class PalantirManager
      * acquired palantir for a random interval of time.
      * This operation is forwarded to the simulator to handle.
      *
-     * @param being The being thread that is requesting to gaze.
+     * @param being    The being thread that is requesting to gaze.
      * @param palantir The palantir previously acquired by a call
      *                 to {@link #acquirePalantir(long)}.
      */

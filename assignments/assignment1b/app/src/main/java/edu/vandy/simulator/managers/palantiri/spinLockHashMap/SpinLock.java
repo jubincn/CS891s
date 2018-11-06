@@ -16,6 +16,7 @@ class SpinLock {
      * "unlocked".
      */
     // TODO -- you fill in here.
+    private AtomicBoolean locked = new AtomicBoolean(false);
  
     /**
      * Acquire the lock only if it is free at the time of invocation.
@@ -26,8 +27,7 @@ class SpinLock {
     public boolean tryLock() {
         // Try to set mOwner's value to true, which succeeds iff its
         // current value is false.
-        // TODO -- you fill in here, replacing false with the proper code.
-        return false;
+        return locked.compareAndSet(false, true);
     }
 
     /**
@@ -47,6 +47,11 @@ class SpinLock {
         // check if a shutdown has been requested and if so throw a
         // cancellation exception.
         // TODO -- you fill in here.
+        do {
+            if (isCancelled.get()) {
+                throw new CancellationException("Canceled");
+            }
+        } while (!tryLock());
     }
 
     /**
@@ -56,5 +61,6 @@ class SpinLock {
         // Atomically release the lock that's currently held by
         // mOwner.
         // TODO -- you fill in here.
+        locked.set(false);
     }
 }

@@ -1,8 +1,10 @@
 package edu.vandy.simulator.managers.palantiri.spinLockHashMap;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.function.Supplier;
 
 import edu.vandy.simulator.managers.palantiri.Palantir;
 import edu.vandy.simulator.managers.palantiri.PalantirManager;
@@ -16,19 +18,21 @@ public class SpinLockHashMapMgr extends PalantirManager {
      * Debugging tag used by the Android logger.
      */
     protected final static String TAG =
-        SpinLockHashMapMgr.class.getSimpleName();
+            SpinLockHashMapMgr.class.getSimpleName();
 
     /**
      * A "spin lock" used to ensure that threads serialize on a
      * critical section.
      */
     // TODO -- you fill in here.
+    private SpinLock spinLock;
 
     /**
      * A counting Semaphore that limits concurrent access to the fixed
      * number of available palantiri managed by the PalantirManager.
      */
     // TODO -- you fill in here.
+    private Semaphore semaphore;
 
     /**
      * A map that associates the @a Palantiri key to the @a boolean
@@ -49,13 +53,20 @@ public class SpinLockHashMapMgr extends PalantirManager {
         // getPalantiri() factory method and initialize each key in
         // the mPalantiriMap with "true" to indicate it's available.
         // TODO -- you fill in here.
+        List<Palantir> palantirs = getPalantiri();
+        for (Palantir item : palantirs) {
+            mPalantiriMap.put(item, true);
+        }
 
         // Initialize the Semaphore to use a "fair" implementation
         // that mediates concurrent access to the given Palantiri.
         // TODO -- you fill in here.
+        int count = getPalantirCount();
+        semaphore = new Semaphore(count, true);
 
         // Initialize the SpinLock.
         // TODO -- you fill in here.
+        spinLock = new SpinLock();
     }
 
     /**
@@ -74,6 +85,16 @@ public class SpinLockHashMapMgr extends PalantirManager {
         // isn't available, return that palantir to the client, and
         // release the spin-lock.
         // TODO -- you fill in here.
+        semaphore.acquireUninterruptibly();
+        spinLock.lock(() -> false);
+        for (Palantir pal : getPalantiri()) {
+            if (mPalantiriMap.get(pal)) {
+                mPalantiriMap.put(pal, false);
+                return pal;
+            }
+        }
+        spinLock.unlock();
+
 
 
         // This invariant should always hold for all acquire()
@@ -86,8 +107,8 @@ public class SpinLockHashMapMgr extends PalantirManager {
         // changed so that this statement isn't reached (it is reached
         // currently on every run)
         throw new IllegalStateException("This method should either return a valid " +
-                                        "Palantir or throw a CancellationException. " +
-                                        "In either case, this statement should not be reached.");
+                "Palantir or throw a CancellationException. " +
+                "In either case, this statement should not be reached.");
     }
 
     /**
@@ -102,6 +123,10 @@ public class SpinLockHashMapMgr extends PalantirManager {
         // in a thread-safe manner and release the Semaphore if all
         // works properly.
         // TODO -- you fill in here.
+        spinLock.lock(() -> false);
+        mPalantiriMap.put(palantir, true);
+        spinLock.unlock();
+        semaphore.release();
     }
 
     /**
@@ -112,7 +137,7 @@ public class SpinLockHashMapMgr extends PalantirManager {
      */
     @Override
     public int availablePermits() {
-        return mAvailablePalantiri.availablePermits();
+        return semaphore.availablePermits();
     }
 
     /**
