@@ -1,8 +1,11 @@
 package edu.vandy.simulator.managers.palantiri.spinLockHashMap;
 
+import android.support.annotation.NonNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
@@ -86,16 +89,18 @@ public class SpinLockHashMapMgr extends PalantirManager {
         // release the spin-lock.
         // TODO -- you fill in here.
         semaphore.acquireUninterruptibly();
-        spinLock.lock(() -> false);
-        for (Palantir pal : getPalantiri()) {
-            if (mPalantiriMap.get(pal)) {
-                mPalantiriMap.put(pal, false);
-                return pal;
+        try {
+            spinLock.lock(() -> false);
+            for (Palantir pal : getPalantiri()) {
+                if (mPalantiriMap.get(pal)) {
+                    mPalantiriMap.put(pal, false);
+                    return pal;
+                }
             }
+
+        } finally {
+            spinLock.unlock();
         }
-        spinLock.unlock();
-
-
 
         // This invariant should always hold for all acquire()
         // implementations if implemented correctly. That is the
@@ -125,8 +130,8 @@ public class SpinLockHashMapMgr extends PalantirManager {
         // TODO -- you fill in here.
         spinLock.lock(() -> false);
         mPalantiriMap.put(palantir, true);
-        spinLock.unlock();
         semaphore.release();
+        spinLock.unlock();
     }
 
     /**

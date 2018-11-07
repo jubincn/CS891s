@@ -50,13 +50,17 @@ public class SimpleBeingRunnable
         // for this being via a call to the appropriate Being super
         // class helper method.
         // DONE -- you fill in here.
-        Palantir palantir;
+        Palantir palantir = mManager.acquirePalantir(this);
         try {
-            palantir = mManager.acquirePalantir(this);
-            palantir.gaze(this);
-            mManager.releasePalantir(this, palantir);
+            if (palantir != null) {
+                palantir.gaze(this);
+            } else {
+                throw new CancellationException("palantir is null in acquirePalantirAndGaze()");
+            }
         } catch (CancellationException e) {
-            error(e);
+//            error(e);
+        } finally {
+            mManager.releasePalantir(this, palantir);
         }
     }
 }

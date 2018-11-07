@@ -166,7 +166,7 @@ public abstract class PalantirManager
      * @param beingId The being id (not currently used).
      * @return A Palantir or null if the a shutdown in progress.
      */
-    // Done: fix this and them remove comment...
+    // DONE: fix this and them remove comment...
     @NotNull
     final public Palantir acquirePalantir(long beingId) {
         return acquire();

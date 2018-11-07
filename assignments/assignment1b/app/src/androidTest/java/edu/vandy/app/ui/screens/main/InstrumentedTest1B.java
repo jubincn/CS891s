@@ -96,7 +96,7 @@ public class InstrumentedTest1B {
                     "https://www.youtube.com/watch?v=GdrXGs2Ipp4&index=8&list=PLZ9NgFYEMxp4p5piHxajQXRRlsyDCLvI3"
             }
     )
-    @Test(timeout = 60000)
+    @Test(timeout = 80000)
     public void normalTest() throws Throwable {
         // Sleep to wait for app to start.
         try {

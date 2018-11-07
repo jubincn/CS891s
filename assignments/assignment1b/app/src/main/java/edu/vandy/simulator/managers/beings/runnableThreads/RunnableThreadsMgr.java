@@ -55,10 +55,15 @@ public class RunnableThreadsMgr
         //  used to wait for all the being threads to finish and
         //  return that thread to the caller.
         // DONE -- you fill in here.
-        createAndStartWaiterForBeingThreads();
+        Thread sentry = createAndStartWaiterForBeingThreads();
 
         // Block until the waiter thread has finished.
         // DONE -- you fill in here.
+        try {
+            sentry.join();
+        } catch (InterruptedException ie) {
+        }
+
         shutdownNow();
     }
 
@@ -85,8 +90,9 @@ public class RunnableThreadsMgr
             Thread thread = new Thread(being);
             thread.setUncaughtExceptionHandler((t, e) -> error("An exception " + e + " occured in thread " + thread.getName()));
             mBeingThreads.add(thread);
-            thread.start();
         }
+
+        mBeingThreads.forEach(Thread::run);
     }
 
     /**
